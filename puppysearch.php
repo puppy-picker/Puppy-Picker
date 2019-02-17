@@ -144,7 +144,7 @@
 		}
 	}
 
-	if (isset($_GET['activity'])) {
+	if (isset($_GET['hair'])) {
 
 		$hairSelected     = $_GET['hair'];		
 		$countHairSelected = count($hairSelected);
