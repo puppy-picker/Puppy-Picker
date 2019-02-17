@@ -132,7 +132,7 @@
 		if ($countActivitySelected > 0){
 			$query_str .= "activity IN (" . "'" .implode("','",$activitySelected). "'";
 			$varActivity = "Activity Level: " .implode(", ",$activitySelected);
-			echo $varActivity . "<br/>";
+			echo "<br/>" . $varActivity . "<br/>";
 		}
 		
 		if ($countActivitySelected > 0){
@@ -152,7 +152,7 @@
 		if ($countHairSelected > 0){
 			$query_str .= "hair IN (" . "'" .implode("','",$hairSelected). "'";
 			$varHair= "Hair Length: " .implode(", ",$hairSelected);
-			echo $varHair . "<br/>";			
+			echo "<br/>" . $varHair . "<br/>";			
 		}
 		
 		if ($countHairSelected > 0){
