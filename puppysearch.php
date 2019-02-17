@@ -102,6 +102,7 @@
 	<u>Your Selected Puppy Qualities </u>
 	
 	<?php
+	echo "<br/>";
 	
 	if (isset($_GET['size'])) {
 
@@ -111,7 +112,7 @@
 		if ($countSizeSelected > 0){
 			$query_str .= "size IN (" . "'" .implode("','",$sizeSelected). "'";
 			$varSize = "Size: " .implode(", ",$sizeSelected);
-			echo "<br/>" . $varSize . "<br/>";
+			echo $varSize . "<br/>";
 
 		}
 		
@@ -132,7 +133,7 @@
 		if ($countActivitySelected > 0){
 			$query_str .= "activity IN (" . "'" .implode("','",$activitySelected). "'";
 			$varActivity = "Activity Level: " .implode(", ",$activitySelected);
-			echo "<br/>" . $varActivity . "<br/>";
+			echo $varActivity . "<br/>";
 		}
 		
 		if ($countActivitySelected > 0){
@@ -152,7 +153,7 @@
 		if ($countHairSelected > 0){
 			$query_str .= "hair IN (" . "'" .implode("','",$hairSelected). "'";
 			$varHair= "Hair Length: " .implode(", ",$hairSelected);
-			echo "<br/>" . $varHair . "<br/>";			
+			echo $varHair . "<br/>";			
 		}
 		
 		if ($countHairSelected > 0){
@@ -179,22 +180,22 @@
 	$pickedPups = json_decode(json_encode($result), true);
 	
 	$noPups = "Sorry, no puppies found in our database.";
-	
+
 	foreach ($pickedPups as $key => $breed) {
 		echo "\n";
 		foreach ($breed as $attribute => $values) {
 			echo "<br/>" . $values . "<br/>";
 		}
-	}
-			
+	 }	
 	if(empty($values)){
 		
 		echo "<br/>" . $noPups;
+		}
+
 	}
-}
 
 
-
+ echo $sql;
 	?>     
 
 
