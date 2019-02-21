@@ -6,6 +6,8 @@
 <meta charset="utf-8" />
 <meta name="Author" content="Diane Nealon and Gabriella Mayorga" />
 <meta name="generator" content="Notepad++" />
+
+
 <style>
 	/* Customize the label (the container) */
 	.container {
@@ -82,6 +84,10 @@
 	</style>
 
 	</head>
+	
+	
+
+
 	<body>
 
 	<header id="h1" style = "border: 1px solid; padding: 1px 5px; font-size: 35px; text-align:center;"> 
@@ -176,26 +182,122 @@
 	?> 
 
 	<?php
-		
 	$pickedPups = json_decode(json_encode($result), true);
 	
 	$noPups = "Sorry, no puppies found in our database.";
 
+	$facts = " facts";
+	
+	
+	//Display chosen puppies
 	foreach ($pickedPups as $key => $breed) {
 		echo "\n";
 		foreach ($breed as $attribute => $values) {
 			echo "<br/>" . $values . "<br/>";
+			
+			$valfact = $values . $facts;
+			
+			$puppyArJS[] = $valfact;
+//Take chosen puppies and run through YouTube API to find videos	
+
+				?>
+				
+				
+				  <script>
+// Load the client interfaces for the YouTube Analytics and Data APIs, which
+// are required to use the Google APIs JS client. More info is available at
+// https://developers.google.com/api-client-library/javascript/dev/dev_jscript#loading-the-client-library-and-the-api
+	
+	function init() {
+            gapi.client.setApiKey('KEY GOES HERE');
+            gapi.client.load('youtube', 'v3', function() {
+                    search();
+            });
+    }
+	
+ </script>
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+ <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"> </script>
+ <script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+ 
+<script>
+// pass PHP variable declared above to JavaScript variable
+var jsValues = <?php echo json_encode($puppyArJS) ?>;
+
+var test = jsValues.toString().split(',').length;
+// Search for a specified string.	
+    function search() {
+		
+		if(test ==1 ){
+            var q = jsValues;
+            var request = gapi.client.youtube.search.list({
+                       q: q,
+                    part: 'snippet',
+					type: "video",
+		            maxResults: 1,
+
+					
+            });
+            request.execute(function(response) {
+                    var str = JSON.stringify(response.result);
+                    $('#search-container').html('<pre>' + str + '</pre>');
+            });
+			
+				console.log(jsValues);
+		console.log(test);
+    }
+	else{
+	
+	
+	var replaceJSValues = jsValues.shift();
+
+		
+
+
+	var q = replaceJSValues;
+            var request = gapi.client.youtube.search.list({
+                       q: q,
+                    part: 'snippet',
+					type: "video",
+		            maxResults: 1,
+
+					
+            });
+            request.execute(function(response) {
+                    var str = JSON.stringify(response.result);
+                    $('#search-container').html('<pre>' + str + '</pre>');
+            });
+		
+		
+
+		
+
+			console.log(replaceJSValues);
+		console.log(test);
+
+	}
+
+	
+	}
+	
+</script>
+
+<?php 
 		}
-	 }	
+	}	
+	}
+	
+
 	if(empty($values)){
 		
 		echo "<br/>" . $noPups;
 		}
 
-	}
+	
 
 
- echo $sql;
+ //echo $sql;
 	?>     
 
 
