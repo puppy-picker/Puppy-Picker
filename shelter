@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+   <title>Puppy Shelters</title>
+   <meta charset="utf-8" />
+   <meta name="Author" content="Diane Nealon" />
+</head>
+
+<style>
+body{
+	background: #fff2cc;
+	font-family: Helvetica;
+}
+</style>
+<body>
+
+
+
+<?php
+
+	$zip = $_GET['zip'];
+	$country = $_GET['country'];
+	
+	
+	$baseURL = "api.tomtom.com";
+	$query = "animal shelter";
+	$ext = "json?";
+	$key = "CALC1EJWVupfChMGr8CT7vpEzll896Gs";
+	
+	$url = 'http://' . $baseURL . '/search/2/geocode/' . $zip . '.' . $ext . 'limit=3&countrySet='.$country.'&key='.$key;
+	$content = file_get_contents('https://api.tomtom.com/search/2/geocode/08050.json?limit=1&countrySet=US&key=CALC1EJWVupfChMGr8CT7vpEzll896Gs');
+	$json = json_decode($content, true);
+
+	
+	echo "<p>";
+	echo $json;
+	echo "</p>";
+	
+	foreach($json['position'] as $item){
+		print['position'][0]['lat'];
+		print['position'][1]['lon'];
+	}
+	
+?>
+
+<p>Continue here<a href="position.html" target="_blank">Your position!</a></p>
+
+<footer style="border: 1px solid blue; padding: 1px 5px;">
+D. Nealon
+
+<span style="float: right;">
+<a href="http://validator.w3.org/check/referer">HTML5</a> /
+<a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">
+    CSS3 </a>
+</span>
+</footer>
+
+
+</body>
+</html>
