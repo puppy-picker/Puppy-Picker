@@ -70,6 +70,9 @@
          background: #fff2cc;
          font-family: Helvetica;
          }
+		 iframe{
+		 border-width: 0px;
+		 }
       </style>
    </head>
    <body>
@@ -77,186 +80,161 @@
          Breeds That Fit Your Search!
       </header>
       <?php
-         if (isset($_GET['Submit'])) {
-         	
-         	require_once('Connect.php');
-         	require_once('debughelp.php');
-         	
-         	$dbh = ConnectDB();
-         
-         $query_str = " WHERE ";
-         ?>
+if (isset($_GET['Submit'])) {
+    
+    require_once('Connect.php');
+    require_once('debughelp.php');
+    
+    $dbh = ConnectDB();
+    
+    $query_str = " WHERE ";
+?>
       <u>Your Selected Puppy Qualities </u>
       <?php
-         echo "<br/>";
-         
-         if (isset($_GET['size'])) {
-         
-         	$sizeSelected     = $_GET['size'];
-         	$countSizeSelected = count($sizeSelected);
-         	
-         	if ($countSizeSelected > 0){
-         		$query_str .= "size IN (" . "'" .implode("','",$sizeSelected). "'";
-         		$varSize = "Size: " .implode(", ",$sizeSelected);
-         		echo $varSize . "<br/>";
-         
-         	}
-         	
-         	if ($countSizeSelected > 0){
-         		$query_str .= ")";
-         	}		
-         	
-         	if ($countSizeSelected >  0){
-         		$query_str .= " AND ";
-         	}
-         }
-         
-         if (isset($_GET['activity'])) {
-         	
-         	$activitySelected = $_GET['activity'];
-         	$countActivitySelected = count($activitySelected);
-         	
-         	if ($countActivitySelected > 0){
-         		$query_str .= "activity IN (" . "'" .implode("','",$activitySelected). "'";
-         		$varActivity = "Activity Level: " .implode(", ",$activitySelected);
-         		echo $varActivity . "<br/>";
-         	}
-         	
-         	if ($countActivitySelected > 0){
-         		$query_str .= ")";
-         	}		
-         	
-         	if ($countActivitySelected >  0){
-         		$query_str .= " AND ";
-         	}
-         }
-         
-         if (isset($_GET['hair'])) {
-         
-         	$hairSelected     = $_GET['hair'];		
-         	$countHairSelected = count($hairSelected);
-         
-         	if ($countHairSelected > 0){
-         		$query_str .= "hair IN (" . "'" .implode("','",$hairSelected). "'";
-         		$varHair= "Hair Length: " .implode(", ",$hairSelected);
-         		echo $varHair . "<br/>";			
-         	}
-         	
-         	if ($countHairSelected > 0){
-         		$query_str .= ")";
-         	}		
-         	
-         	if ($countHairSelected >  0){
-         		$query_str .= " AND ";
-         	}		
-         }
-         	
-         $query_str = substr($query_str, 0, -5);
-         
-       if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size']))  { 
-         $sql  = "SELECT breed FROM Puppies" . $query_str;
-         $stmt = $dbh->prepare($sql);
-         $stmt->execute();
-         $result = $stmt->fetchAll(PDO::FETCH_OBJ);
-         $stmt   = null;
-		 
-	   }
-         ?> 
-      <?php
-	         if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size']))  { 
+    echo "<br/>";
+    
+    if (isset($_GET['size'])) {
+        
+        $sizeSelected      = $_GET['size'];
+        $countSizeSelected = count($sizeSelected);
+        
+        if ($countSizeSelected > 0) {
+            $query_str .= "size IN (" . "'" . implode("','", $sizeSelected) . "'";
+            $varSize = "Size: " . implode(", ", $sizeSelected);
+            echo $varSize . "<br/>";
+            
+        }
+        
+        if ($countSizeSelected > 0) {
+            $query_str .= ")";
+        }
+        
+        if ($countSizeSelected > 0) {
+            $query_str .= " AND ";
+        }
+    }
+    
+    if (isset($_GET['activity'])) {
+        
+        $activitySelected      = $_GET['activity'];
+        $countActivitySelected = count($activitySelected);
+        
+        if ($countActivitySelected > 0) {
+            $query_str .= "activity IN (" . "'" . implode("','", $activitySelected) . "'";
+            $varActivity = "Activity Level: " . implode(", ", $activitySelected);
+            echo $varActivity . "<br/>";
+        }
+        
+        if ($countActivitySelected > 0) {
+            $query_str .= ")";
+        }
+        
+        if ($countActivitySelected > 0) {
+            $query_str .= " AND ";
+        }
+    }
+    
+    if (isset($_GET['hair'])) {
+        
+        $hairSelected      = $_GET['hair'];
+        $countHairSelected = count($hairSelected);
+        
+        if ($countHairSelected > 0) {
+            $query_str .= "hair IN (" . "'" . implode("','", $hairSelected) . "'";
+            $varHair = "Hair Length: " . implode(", ", $hairSelected);
+            echo $varHair . "<br/>";
+        }
+        
+        if ($countHairSelected > 0) {
+            $query_str .= ")";
+        }
+        
+        if ($countHairSelected > 0) {
+            $query_str .= " AND ";
+        }
+    }
+    
+    $query_str = substr($query_str, 0, -5);
+    
+    if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size'])) {
+        $sql  = "SELECT breed FROM Puppies" . $query_str;
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute();
+        $result     = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $stmt       = null;
+        $pickedPups = json_decode(json_encode($result), true);
+        
+        
+        //Display chosen puppies
+        foreach ($pickedPups as $key => $breed) {
+            echo "\n";
+            foreach ($breed as $attribute => $values) {
+                echo "<br/>" . $values . "<br/>";
+                
+                $countPups = count($pickedPups);
+                
+                if ($countPups > 0) {
+                                        
+                    $replacepickedPups = array_shift($pickedPups);
+                    $q                 = implode(', ', $replacepickedPups);
+                    
+                    $key = "AIzaSyCTwSXX55Zg-DdPopIiB1TvStGws4Na0bg";
+                    
+                    // generate YouTube API URL
+                    $feedURL   = file_get_contents("https://content.googleapis.com/youtube/v3/search?maxResults=1&part=snippet&q=" . urlencode($q) . "%20facts&type=video&key=" . urldecode($key));
+                    $strDecode = json_decode($feedURL, true);
+                                        
+                    //video id:
+                    $videoID = $strDecode["items"]["0"]["id"]["videoId"];
+                    
+                    //video title:
+                    $videoTitle = $strDecode["items"]["0"]["snippet"]["title"];
+                                        
+                    //check if vidId already in database
+                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
+                    $prepvidID   = $dbh->prepare($selectVidID);
+                    $prepvidID->execute();
+                    $vidIDResult = $prepvidID->fetchAll(PDO::FETCH_OBJ);
+                    $prepvidID   = null;
+                    
+                    if ($vidIDResult == null) {
+                        
+                        //insert new videoId and videoTitle to database
+                        $query   = "INSERT INTO vidPups (vidID, vidTitle) VALUES ('$videoID', '$videoTitle')";
+                        $vidStmt = $dbh->prepare($query);
+                        $vidStmt->execute();
+                        $vidStmt = null;
+                    }
+					
+                    //select correct videoID to find youtube video
+                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
+                    $prepvidID   = $dbh->prepare($selectVidID);
+                    $prepvidID->execute();
+                    $vidIDResult = $prepvidID->fetchAll(PDO::FETCH_OBJ);
+                    $prepvidID   = null;
+                                        
+                    //turn result from array to string and trim it
+                    $vidIDResultString      = json_encode($vidIDResult);
+                    $vidIDResultStringTrim1 = trim($vidIDResultString, '[{"vidID":"');
+                    $vidIDResultStringTrim2 = trim($vidIDResultStringTrim1, '"}]');
+                    
+                    //display youtube video
+?>
+		<iframe width="560" height="315" src="https://www.youtube.com/embed/<?php echo $vidIDResultStringTrim2; ?> " allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+		
+		<?php                            
+                }
+            }
+        }
+    }
+}
 
-         $pickedPups = json_decode(json_encode($result), true);
-			 }
-			 
-         $noPups = "Sorry, no puppies found in our database.";
-         
-         $facts = " facts";
-          
-       if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size']))  { 
-		  
-         //Display chosen puppies
-         foreach ($pickedPups as $key => $breed) {
-         	echo "\n";
-         	foreach ($breed as $attribute => $values) {
-         		echo "<br/>" . $values . "<br/>";
-         		
-         		$valfact = $values . $facts;
-         		
-         		$puppyArJS[] = $valfact;
-         //Take chosen puppies and run through YouTube API to find videos	
-         
-         			?>
-      <script>
-         // Load the client interfaces for the YouTube Analytics and Data APIs, which
-         // are required to use the Google APIs JS client. More info is available at
-         // https://developers.google.com/api-client-library/javascript/dev/dev_jscript#loading-the-client-library-and-the-api
-         	
-         	function init() {
-                     gapi.client.setApiKey('AIzaSyAKTRJZ39cWh0Ia3zJ7Eeqg513JYfbGiMw');
-                     gapi.client.load('youtube', 'v3', function() {
-                             search();
-                     });
-             }
-      </script>
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-      <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"> </script>
-      <script src="https://apis.google.com/js/client.js?onload=init"></script>
-      <script>
-         // pass PHP variable declared above to JavaScript variable
-         var jsValues = <?php echo json_encode($puppyArJS) ?>;
-         
-         var test = jsValues.toString().split(',').length;
-         // Search for a specified string.	
-             function search() {
-         		
-         		if(test ==1 ){
-                     var q = jsValues;
-                     var request = gapi.client.youtube.search.list({
-                                q: q,
-                             part: 'snippet',
-         					type: "video",
-         		            maxResults: 1,      					
-                     });
-                     request.execute(function(response) {
-                             var str = JSON.stringify(response.result);
-                             $('#search-container').html('<pre>' + str + '</pre>');
-                     });
-             }
-         	else{
-         	         	
-         	var replaceJSValues = jsValues.shift();
+//if no puppies from database match user selected attributes:
+if (empty($values)) {
+    echo "<br/>" . "Sorry, no puppies found in our database.";
+}
 
-         	var q = replaceJSValues;
-                     var request = gapi.client.youtube.search.list({
-                                q: q,
-                             part: 'snippet',
-         					type: "video",
-         		            maxResults: 1,
-         
-         					
-                     });
-                     request.execute(function(response) {
-                             var str = JSON.stringify(response.result);
-                             $('#search-container').html('<pre>' + str + '</pre>');
-                     
-					 obj = JSON.parse(str);
-
-					 				console.log(obj);
-
-					 });
-         
-         	}}
-         	
-
-      </script>
-      <?php
-         }}}      }
-         if(empty($values)){
-         
-         echo "<br/>" . $noPups;
-         }
-         
-     ?>     
+?>     
       <br style="clear: both;" />
       <hr />
       <footer id = "f1" style="border: 1px solid; padding: 1px 5px">
