@@ -5,75 +5,10 @@
       <meta charset="utf-8" />
       <meta name="Author" content="Diane Nealon and Gabriella Mayorga" />
       <meta name="generator" content="Notepad++" />
-      <style>
-         /* Customize the label (the container) */
-         .container {
-         display: block;
-         position: relative;
-         padding-left: 35px;
-         margin-bottom: 12px;
-         cursor: pointer;
-         font-size: 15px;
-         -webkit-user-select: none;
-         -moz-user-select: none;
-         -ms-user-select: none;
-         user-select: none;
-         }
-         /* Hide the browser's default checkbox */
-         .container input {
-         position: absolute;
-         opacity: 0;
-         cursor: pointer;
-         height: 0;
-         width: 0;
-         }
-         /* Create a custom checkbox */
-         .checkmark {
-         position: absolute;
-         top: 0;
-         left: 0;
-         height: 15px;
-         width: 15px;
-         background-color: #eee;
-         }
-         /* On mouse-over, add a grey background color */
-         .container:hover input ~ .checkmark {
-         background-color: #ccc;
-         }
-         /* When the checkbox is checked, add a blue background */
-         .container input:checked ~ .checkmark {
-         background-color: #664d00;
-         }
-         /* Create the checkmark/indicator (hidden when not checked) */
-         .checkmark:after {
-         content: "";
-         position: absolute;
-         display: none;
-         }
-         /* Show the checkmark when checked */
-         .container input:checked ~ .checkmark:after {
-         display: block;
-         }
-         /* Style the checkmark/indicator */
-         .container .checkmark:after {
-         left: 5px;
-         top: 5px;
-         width: 3px;
-         height: 7px;
-         border: solid #ffcccc;
-         border-width: 0 3px 3px 0;
-         -webkit-transform: rotate(45deg);
-         -ms-transform: rotate(45deg);
-         transform: rotate(45deg);
-         }
-         body{
-         background: #fff2cc;
-         font-family: Helvetica;
-         }
-		 iframe{
-		 border-width: 0px;
-		 }
-      </style>
+     
+   
+   <link rel="stylesheet" type="text/css" href="./puppysearch.css" />
+
    </head>
    <body>
       <header id="h1" style = "border: 1px solid; padding: 1px 5px; font-size: 35px; text-align:center;"> 
@@ -89,7 +24,7 @@ if (isset($_GET['Submit'])) {
     
     $query_str = " WHERE ";
 ?>
-      <u>Your Selected Puppy Qualities </u>
+     <u>Your Selected Puppy Qualities </u>
       <?php
     echo "<br/>";
     
@@ -153,7 +88,6 @@ if (isset($_GET['Submit'])) {
             $query_str .= " AND ";
         }
     }
-    
     $query_str = substr($query_str, 0, -5);
     
     if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size'])) {
@@ -164,32 +98,38 @@ if (isset($_GET['Submit'])) {
         $stmt       = null;
         $pickedPups = json_decode(json_encode($result), true);
         
-        
+        $countPups = count($pickedPups);
+?>
+        There are <?php echo $countPups; ?> matching breeds:
+<?php
         //Display chosen puppies
         foreach ($pickedPups as $key => $breed) {
-            echo "\n";
+            
+            
             foreach ($breed as $attribute => $values) {
-                echo "<br/>" . $values . "<br/>";
-                
-                $countPups = count($pickedPups);
                 
                 if ($countPups > 0) {
-                                        
+                    
                     $replacepickedPups = array_shift($pickedPups);
                     $q                 = implode(', ', $replacepickedPups);
                     
-                    $key = "AIzaSyCTwSXX55Zg-DdPopIiB1TvStGws4Na0bg";
+                    $key = "AIzaSyAKTRJZ39cWh0Ia3zJ7Eeqg513JYfbGiMw";
                     
                     // generate YouTube API URL
                     $feedURL   = file_get_contents("https://content.googleapis.com/youtube/v3/search?maxResults=1&part=snippet&q=" . urlencode($q) . "%20facts&type=video&key=" . urldecode($key));
                     $strDecode = json_decode($feedURL, true);
-                                        
+                    
+                    echo '<script>';
+                    echo 'console.log(' . json_encode($strDecode) . ')';
+                    echo '</script>';
+                    
                     //video id:
                     $videoID = $strDecode["items"]["0"]["id"]["videoId"];
                     
                     //video title:
                     $videoTitle = $strDecode["items"]["0"]["snippet"]["title"];
-                                        
+                    
+                    
                     //check if vidId already in database
                     $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
                     $prepvidID   = $dbh->prepare($selectVidID);
@@ -205,14 +145,14 @@ if (isset($_GET['Submit'])) {
                         $vidStmt->execute();
                         $vidStmt = null;
                     }
-					
+                    
                     //select correct videoID to find youtube video
                     $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
                     $prepvidID   = $dbh->prepare($selectVidID);
                     $prepvidID->execute();
                     $vidIDResult = $prepvidID->fetchAll(PDO::FETCH_OBJ);
                     $prepvidID   = null;
-                                        
+                    
                     //turn result from array to string and trim it
                     $vidIDResultString      = json_encode($vidIDResult);
                     $vidIDResultStringTrim1 = trim($vidIDResultString, '[{"vidID":"');
@@ -220,13 +160,56 @@ if (isset($_GET['Submit'])) {
                     
                     //display youtube video
 ?>
-		<iframe width="560" height="315" src="https://www.youtube.com/embed/<?php echo $vidIDResultStringTrim2; ?> " allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-		
-		<?php                            
+<div class="slideshow-container">
+
+<div class="mySlides fade">
+  <iframe src="https://www.youtube.com/embed/<?php echo $vidIDResultStringTrim2; ?> " allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"  style="width: 800px; height: 600px; " allowfullscreen></iframe>
+                    <div class="text"><?php echo $values; ?></div>
+</div>
+
+</div>   
+        <?php
+                    
                 }
             }
         }
     }
+?>
+<a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+<a class="next" onclick="plusSlides(1)">&#10095;</a>
+
+<br>
+
+<script>
+var slideIndex = 1;
+showSlides(slideIndex);
+
+function plusSlides(n) {
+  showSlides(slideIndex += n);
+}
+
+function currentSlide(n) {
+  showSlides(slideIndex = n);
+}
+
+function showSlides(n) {
+  var i;
+  var slides = document.getElementsByClassName("mySlides");
+  var dots = document.getElementsByClassName("dot");
+  if (n > slides.length) {slideIndex = 1}    
+  if (n < 1) {slideIndex = slides.length}
+  for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";  
+  }
+  for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
+  }
+  slides[slideIndex-1].style.display = "block";  
+
+}
+</script>
+<?php
+    
 }
 
 //if no puppies from database match user selected attributes:
