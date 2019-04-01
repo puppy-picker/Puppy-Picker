@@ -94,28 +94,26 @@ body{
 
 
 <h2>Size</h2>
-
-   Small: <input type="checkbox" name="size[]" value = "small"/>
-   Medium: <input type="checkbox" name="size[]" value = "medium"/>
+   Small: <input type="checkbox" name="size[]" value = "small"/><br>
+   Medium: <input type="checkbox" name="size[]" value = "medium"/><br>
    Large: <input type="checkbox" name="size[]" value = "large"/>
     
 
 	<h2>Activity</h2>
-
-   Calm: <input type="checkbox" name="activity[]" value = "calm"/>
-   Energetic: <input type="checkbox" name="activity[]" value = "energetic"/>
-   Regular: <input type="checkbox" name="activity[]" value = "regular"/>
+   Calm: <input type="checkbox" name="activity[]" value = "calm"/><br>
+   Energetic: <input type="checkbox" name="activity[]" value = "energetic"/><br>
+   Regular: <input type="checkbox" name="activity[]" value = "regular"/><br>
    Lots: <input type="checkbox" name="activity[]" value = "lots of activity"/>
 
 
 
 <h2>Hair</h2>
-
-
-   Short: <input type="checkbox" name="hair[]" value="short" />
-   Medium: <input type="checkbox" name="hair[]" value = "medium" />
+   Short: <input type="checkbox" name="hair[]" value="short" /><br>
+   Medium: <input type="checkbox" name="hair[]" value = "medium" /><br>
    Long: <input type="checkbox" name="hair[]" value = "long"/>
 
+<h2>Zip Code</h2>
+ <input type = "text" name="zip"/><br>
 
  <input type = "reset" value="Reset"/>
 	
