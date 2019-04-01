@@ -3,7 +3,7 @@
    <head>
       <title>Puppy Picker</title>
       <meta charset="utf-8" />
-      <meta name="Author" content="Gabriella Mayorga" />
+      <meta name="Author" content="Diane Nealon and Gabriella Mayorga" />
       <meta name="generator" content="Notepad++" />
      
    
@@ -94,6 +94,13 @@ if (isset($_GET['Submit'])) {
             $query_str .= " AND ";
         }
     }
+	
+	    if (isset($_GET['zip'])) {
+        
+        $zipCode      = $_GET['zip'];
+
+    }
+	
     $query_str = substr($query_str, 0, -5);
     
 			//check if hair, activity, or size attributes selected in puppypicker.php and add to query string
@@ -110,7 +117,7 @@ if (isset($_GET['Submit'])) {
         $countPups = count($pickedPups);
 		
 		//if there are more than one result from above search, then run code
-		  if ($countPups > 2) {
+		  if ($countPups >= 2) {
 ?>
         There are <?php echo $countPups; ?> matching puppies:
 <?php
@@ -124,7 +131,7 @@ if (isset($_GET['Submit'])) {
 		
 		 //Petfinder API:
 		$petfinderKey = 'KEY';
-		$petfinderSecret = 'SECRET';
+		$petfinderSecret = 'KEY';
 
 		//using curl in PHP from https://stackoverflow.com/a/25425751 	
 		$ch = curl_init();
@@ -209,7 +216,7 @@ if (isset($_GET['Submit'])) {
 				<?php
 	    
 		//Search for dog by breed:  
-		$petfinderApiUrl = "https://api.petfinder.com/v2/animals?breed=". urlencode($puppyTypeResult) . "&location=08205&distance=50&status=adoptable&limit=3";
+		$petfinderApiUrl = "https://api.petfinder.com/v2/animals?breed=". urlencode($puppyTypeResult) . "&location=". urlencode($zipCode) ."&distance=100&status=adoptable&limit=3";
 		  
 		  
 		$curl = curl_init($petfinderApiUrl);
@@ -221,6 +228,7 @@ if (isset($_GET['Submit'])) {
 	
 	$petStrDecode = json_decode($jsonPetfinder, true);
 
+	
 	//Dog Name 0
 	$dogName0 = $petStrDecode["animals"]["0"]["name"];
 	//Dog Age 0
@@ -228,12 +236,21 @@ if (isset($_GET['Submit'])) {
 	//Dog Gender 0
 	$dogGender0 = $petStrDecode["animals"]["0"]["gender"];
 	//Dog Contact 0
-	$dogContact0 = $petStrDecode["animals"]["0"]["contact"]["address"];
+	$dogContactCity0 = $petStrDecode["animals"]["0"]["contact"]["address"]["city"];
+	$dogContactState0 = $petStrDecode["animals"]["0"]["contact"]["address"]["state"];
+	$dogContactZip0 = $petStrDecode["animals"]["0"]["contact"]["address"]["postcode"];
+	$dogContactCountry0 = $petStrDecode["animals"]["0"]["contact"]["address"]["country"];
 	//Dog URL 0
 	$dogURL0 = $petStrDecode["animals"]["0"]["url"];
 	//Dog Photo 0
 	$dogPhoto0 = $petStrDecode["animals"]["0"]["photos"]["0"]["full"];
-
+		
+	$query   = "INSERT INTO adoptPups0 (dogName0, dogContactCity0, dogContactState0, 
+				dogContactZip0, dogContactCountry0) 
+				VALUES ('$dogName0', '$dogContactCity0', '$dogContactState0', '$dogContactZip0', '$dogContactCountry0')";
+	$vidStmt = $dbh->prepare($query);
+	$vidStmt->execute();
+	$vidStmt = null;
 	
 	//Dog Name 1
 	$dogName1 = $petStrDecode["animals"]["1"]["name"];
@@ -242,12 +259,21 @@ if (isset($_GET['Submit'])) {
 	//Dog Gender 1
 	$dogGender1 = $petStrDecode["animals"]["1"]["gender"];
 	//Dog Contact 1
-	$dogContact1 = $petStrDecode["animals"]["1"]["contact"]["address"];
+	$dogContactCity1 = $petStrDecode["animals"]["1"]["contact"]["address"]["city"];
+	$dogContactState1 = $petStrDecode["animals"]["1"]["contact"]["address"]["state"];
+	$dogContactZip1 = $petStrDecode["animals"]["1"]["contact"]["address"]["postcode"];
+	$dogContactCountry1 = $petStrDecode["animals"]["1"]["contact"]["address"]["country"];	
 	//Dog URL 1
 	$dogURL1 = $petStrDecode["animals"]["1"]["url"];
 	//Dog Photo 1
 	$dogPhoto1 = $petStrDecode["animals"]["1"]["photos"]["0"]["full"];				
   
+  	$query   = "INSERT INTO adoptPups1 (dogName1, dogContactCity1, dogContactState1, dogContactZip1, dogContactCountry1) 
+				VALUES ('$dogName1', '$dogContactCity1', '$dogContactState1', '$dogContactZip1', '$dogContactCountry1')";
+	$vidStmt = $dbh->prepare($query);
+	$vidStmt->execute();
+	$vidStmt = null;
+	
   	//Dog Name 2
 	$dogName2 = $petStrDecode["animals"]["2"]["name"];
 	//Dog Age 2
@@ -255,13 +281,35 @@ if (isset($_GET['Submit'])) {
 	//Dog Gender 2
 	$dogGender2 = $petStrDecode["animals"]["2"]["gender"];
 	//Dog Contact 2
-	$dogContact2 = $petStrDecode["animals"]["2"]["contact"]["address"];
+	$dogContactCity2 = $petStrDecode["animals"]["2"]["contact"]["address"]["city"];
+	$dogContactState2 = $petStrDecode["animals"]["2"]["contact"]["address"]["state"];
+	$dogContactZip2 = $petStrDecode["animals"]["2"]["contact"]["address"]["postcode"];
+	$dogContactCountry2 = $petStrDecode["animals"]["2"]["contact"]["address"]["country"];
 	//Dog URL 2
 	$dogURL2 = $petStrDecode["animals"]["2"]["url"];
 	//Dog Photo 2
 	$dogPhoto2 = $petStrDecode["animals"]["2"]["photos"]["0"]["full"];
+
+	$query   = "INSERT INTO adoptPups2 (dogName2, dogContactCity2, dogContactState2, 
+			dogContactZip2, dogContactCountry2) 
+			VALUES ('$dogName2', '$dogContactCity2', '$dogContactState2', '$dogContactZip2', '$dogContactCountry2')";
+	$vidStmt = $dbh->prepare($query);
+	$vidStmt->execute();
+	$vidStmt = null;
 		
 		
+			 echo '<script>';
+  echo 'console.log('. json_encode( $dogContactZip2 ) .')';
+  echo '</script>';
+  
+  			 echo '<script>';
+  echo 'console.log('. json_encode( $dogContactZip1 ) .')';
+  echo '</script>';
+  
+  			 echo '<script>';
+  echo 'console.log('. json_encode( $dogContactZip0 ) .')';
+  echo '</script>';
+
 	?>
 <h2>Adoptable Dogs Near You!</h2>
 
