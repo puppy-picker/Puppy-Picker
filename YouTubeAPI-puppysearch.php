@@ -231,6 +231,8 @@ if (isset($_GET['Submit'])) {
 	
 	//Dog Name 0
 	$dogName0 = $petStrDecode["animals"]["0"]["name"];
+	//Dog ID 0
+	$dogID0 = $petStrDecode["animals"]["0"]["id"];
 	//Dog Age 0
 	$dogAge0 = $petStrDecode["animals"]["0"]["age"];
 	//Dog Gender 0
@@ -245,15 +247,17 @@ if (isset($_GET['Submit'])) {
 	//Dog Photo 0
 	$dogPhoto0 = $petStrDecode["animals"]["0"]["photos"]["0"]["full"];
 		
-	$query   = "INSERT INTO adoptPups0 (dogName0, dogContactCity0, dogContactState0, 
+	$query   = "INSERT INTO adoptPups0 (dogName0, petfinderID0, dogContactCity0, dogContactState0, 
 				dogContactZip0, dogContactCountry0) 
-				VALUES ('$dogName0', '$dogContactCity0', '$dogContactState0', '$dogContactZip0', '$dogContactCountry0')";
+				VALUES ('$dogName0', '$dogID0', '$dogContactCity0', '$dogContactState0', '$dogContactZip0', '$dogContactCountry0')";
 	$vidStmt = $dbh->prepare($query);
 	$vidStmt->execute();
 	$vidStmt = null;
 	
 	//Dog Name 1
 	$dogName1 = $petStrDecode["animals"]["1"]["name"];
+	//Dog ID 0
+	$dogID1 = $petStrDecode["animals"]["1"]["id"];
 	//Dog Age 1
 	$dogAge1 = $petStrDecode["animals"]["1"]["age"];
 	//Dog Gender 1
@@ -268,14 +272,16 @@ if (isset($_GET['Submit'])) {
 	//Dog Photo 1
 	$dogPhoto1 = $petStrDecode["animals"]["1"]["photos"]["0"]["full"];				
   
-  	$query   = "INSERT INTO adoptPups1 (dogName1, dogContactCity1, dogContactState1, dogContactZip1, dogContactCountry1) 
-				VALUES ('$dogName1', '$dogContactCity1', '$dogContactState1', '$dogContactZip1', '$dogContactCountry1')";
+  	$query   = "INSERT INTO adoptPups1 (dogName1, petfinderID1, dogContactCity1, dogContactState1, dogContactZip1, dogContactCountry1) 
+				VALUES ('$dogName1','$dogID1', '$dogContactCity1', '$dogContactState1', '$dogContactZip1', '$dogContactCountry1')";
 	$vidStmt = $dbh->prepare($query);
 	$vidStmt->execute();
 	$vidStmt = null;
 	
   	//Dog Name 2
 	$dogName2 = $petStrDecode["animals"]["2"]["name"];
+	//Dog ID 0
+	$dogID2 = $petStrDecode["animals"]["2"]["id"];
 	//Dog Age 2
 	$dogAge2 = $petStrDecode["animals"]["2"]["age"];
 	//Dog Gender 2
@@ -290,26 +296,35 @@ if (isset($_GET['Submit'])) {
 	//Dog Photo 2
 	$dogPhoto2 = $petStrDecode["animals"]["2"]["photos"]["0"]["full"];
 
-	$query   = "INSERT INTO adoptPups2 (dogName2, dogContactCity2, dogContactState2, 
+	$query   = "INSERT INTO adoptPups2 (dogName2, petfinderID2,  dogContactCity2, dogContactState2, 
 			dogContactZip2, dogContactCountry2) 
-			VALUES ('$dogName2', '$dogContactCity2', '$dogContactState2', '$dogContactZip2', '$dogContactCountry2')";
+			VALUES ('$dogName2', '$dogID2', '$dogContactCity2', '$dogContactState2', '$dogContactZip2', '$dogContactCountry2')";
 	$vidStmt = $dbh->prepare($query);
 	$vidStmt->execute();
 	$vidStmt = null;
 		
 		
-			 echo '<script>';
-  echo 'console.log('. json_encode( $dogContactZip2 ) .')';
-  echo '</script>';
   
-  			 echo '<script>';
-  echo 'console.log('. json_encode( $dogContactZip1 ) .')';
-  echo '</script>';
-  
-  			 echo '<script>';
-  echo 'console.log('. json_encode( $dogContactZip0 ) .')';
-  echo '</script>';
-
+			//select ID from petfinder, zip code, and country for each dog in group 0
+			$selectPetfinder0 = "SELECT petfinderID0, dogContactZip0, dogContactCountry0 FROM adoptPups0 WHERE petfinderID0 = '$dogID0';";
+			$prepselectPetfinder0   = $dbh->prepare($selectPetfinder0);
+			$prepselectPetfinder0->execute();
+			$prepselectPetfinderResult0 = $prepselectPetfinder0->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinder0   = null;
+			
+			//select ID from petfinder, zip code, and country for each dog in group 1
+			$selectPetfinder1 = "SELECT petfinderID1, dogContactZip1, dogContactCountry1 FROM adoptPups1 WHERE petfinderID1 = '$dogID1';";
+			$prepselectPetfinder1   = $dbh->prepare($selectPetfinder1);
+			$prepselectPetfinder1->execute();
+			$prepselectPetfinderResult1 = $prepselectPetfinder1->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinder1   = null;
+			
+			//select ID from petfinder, zip code, and country for each dog in group 2
+			$selectPetfinder2 = "SELECT petfinderID2, dogContactZip2, dogContactCountry2 FROM adoptPups2 WHERE petfinderID2 = '$dogID2';";
+			$prepselectPetfinder2   = $dbh->prepare($selectPetfinder2);
+			$prepselectPetfinder2->execute();
+			$prepselectPetfinderResult2 = $prepselectPetfinder2->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinder2   = null;
 	?>
 <h2>Adoptable Dogs Near You!</h2>
 
@@ -320,19 +335,23 @@ if (isset($_GET['Submit'])) {
     <?php echo $dogName0; ?> <br>
     <?php echo $dogGender0; ?> <br>
 	<?php echo $dogAge0; ?> <br>
-    <a href="<?php echo $dogURL0; ?>" target="_blank" >More Info!</a></td>
+    <a href="<?php echo $dogURL0; ?>" target="_blank" >More Info!</a>
+	</td>
 	
      <td><img src="<?php echo $dogPhoto1; ?> " alt="<?php echo $puppyTypeResult; ?>"  width="200" height="200">   <br>
     <?php echo $dogName1; ?> <br>
     <?php echo $dogGender1; ?> <br>
 	<?php echo $dogAge1; ?> <br>
-    <a href="<?php echo $dogURL1; ?>" target="_blank">More Info!</a></td>
+    <a href="<?php echo $dogURL1; ?>" target="_blank">More Info!</a>
+	</td>
 	
      <td><img src="<?php echo $dogPhoto2; ?> " alt="<?php echo $puppyTypeResult; ?>" width="200" height="200">   <br>
     <?php echo $dogName2; ?> <br>
     <?php echo $dogGender2; ?><br>
 	<?php echo $dogAge2; ?> <br>
-    <a href="<?php echo $dogURL2; ?>" target="_blank">More Info!</a></td>
+    <a href="<?php echo $dogURL2; ?>" target="_blank">More Info!</a>
+	</td>
+	
   </tr>
 </table>
 	
