@@ -3,7 +3,7 @@
    <head>
       <title>Puppy Picker</title>
       <meta charset="utf-8" />
-      <meta name="Author" content="Diane Nealon and Gabriella Mayorga" />
+      <meta name="Author" content="Gabriella Mayorga" />
       <meta name="generator" content="Notepad++" />
      
    
@@ -12,22 +12,26 @@
    </head>
    <body>
       <header id="h1" style = "border: 1px solid; padding: 1px 5px; font-size: 35px; text-align:center;"> 
-         Breeds That Fit Your Search!
+         Puppies That Fit Your Search!
       </header>
       <?php
+	  //Check if Submit was pressed in puppypicker.php
 if (isset($_GET['Submit'])) {
     
+	//connect to Database
     require_once('Connect.php');
     require_once('debughelp.php');
     
     $dbh = ConnectDB();
     
+	//Use this to start building SQL query string
     $query_str = " WHERE ";
 ?>
      <u>Your Selected Puppy Qualities </u>
       <?php
     echo "<br/>";
     
+	//check if size attribute selected in puppypicker.php and add to query string
     if (isset($_GET['size'])) {
         
         $sizeSelected      = $_GET['size'];
@@ -49,6 +53,7 @@ if (isset($_GET['Submit'])) {
         }
     }
     
+		//check if activity attribute selected in puppypicker.php and add to query string
     if (isset($_GET['activity'])) {
         
         $activitySelected      = $_GET['activity'];
@@ -69,6 +74,7 @@ if (isset($_GET['Submit'])) {
         }
     }
     
+			//check if hair attribute selected in puppypicker.php and add to query string
     if (isset($_GET['hair'])) {
         
         $hairSelected      = $_GET['hair'];
@@ -90,7 +96,9 @@ if (isset($_GET['Submit'])) {
     }
     $query_str = substr($query_str, 0, -5);
     
+			//check if hair, activity, or size attributes selected in puppypicker.php and add to query string
     if (isset($_GET['hair']) || isset($_GET['activity']) || isset($_GET['size'])) {
+		//build query string and run SQL query
         $sql  = "SELECT breed FROM Puppies" . $query_str;
         $stmt = $dbh->prepare($sql);
         $stmt->execute();
@@ -98,11 +106,43 @@ if (isset($_GET['Submit'])) {
         $stmt       = null;
         $pickedPups = json_decode(json_encode($result), true);
         
+		//count number of results
         $countPups = count($pickedPups);
+		
+		//if there are more than one result from above search, then run code
+		  if ($countPups > 2) {
 ?>
-        There are <?php echo $countPups; ?> matching breeds:
+        There are <?php echo $countPups; ?> matching puppies:
 <?php
-        //Display chosen puppies
+		  }
+		 		  if ($countPups > 0 && $countPups < 2) {
+?>
+        There is <?php echo $countPups; ?> matching puppy:
+<?php
+		  } 
+		  
+		
+		 //Petfinder API:
+		$petfinderKey = 'KEY';
+		$petfinderSecret = 'SECRET';
+
+		//using curl in PHP from https://stackoverflow.com/a/25425751 	
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, "https://api.petfinder.com/v2/oauth2/token");
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, array(
+		'client_id' => $petfinderKey,
+		'client_secret' => $petfinderSecret,
+		'grant_type' => 'client_credentials'
+		));
+
+		//using the Access Token: https://quizlet.com/api/2.0/docs/making-api-calls
+		$petfinderData = json_decode(curl_exec($ch), true);
+		$petfinderAccessToken = $petfinderData['access_token'];   
+
+        //Display chosen puppies, loop through all of them
         foreach ($pickedPups as $key => $breed) {
             
             
@@ -110,19 +150,19 @@ if (isset($_GET['Submit'])) {
                 
                 if ($countPups > 0) {
                     
+					//shift through array by one to get next result, save as replacepickedPups array
                     $replacepickedPups = array_shift($pickedPups);
-                    $q                 = implode(', ', $replacepickedPups);
+					
+					//remove replacepickedPups from array format and have each puppy saved in q after each loop
+                    $puppyTypeResult  = implode(', ', $replacepickedPups);
                     
-                    $key = "AIzaSyAKTRJZ39cWh0Ia3zJ7Eeqg513JYfbGiMw";
+					//YouTube API Key
+                    $youtubeKey = "KEY";
                     
                     // generate YouTube API URL
-                    $feedURL   = file_get_contents("https://content.googleapis.com/youtube/v3/search?maxResults=1&part=snippet&q=" . urlencode($q) . "%20facts&type=video&key=" . urldecode($key));
+                    $feedURL   = file_get_contents("https://content.googleapis.com/youtube/v3/search?maxResults=1&part=snippet&q=" . urlencode($puppyTypeResult) . "%20facts&type=video&key=" . urldecode($youtubeKey));
                     $strDecode = json_decode($feedURL, true);
-                    
-                    echo '<script>';
-                    echo 'console.log(' . json_encode($strDecode) . ')';
-                    echo '</script>';
-                    
+                                        
                     //video id:
                     $videoID = $strDecode["items"]["0"]["id"]["videoId"];
                     
@@ -131,7 +171,7 @@ if (isset($_GET['Submit'])) {
                     
                     
                     //check if vidId already in database
-                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
+                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID';";
                     $prepvidID   = $dbh->prepare($selectVidID);
                     $prepvidID->execute();
                     $vidIDResult = $prepvidID->fetchAll(PDO::FETCH_OBJ);
@@ -147,7 +187,7 @@ if (isset($_GET['Submit'])) {
                     }
                     
                     //select correct videoID to find youtube video
-                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID' LIMIT 1;";
+                    $selectVidID = "SELECT vidID FROM vidPups WHERE vidID = '$videoID';";
                     $prepvidID   = $dbh->prepare($selectVidID);
                     $prepvidID->execute();
                     $vidIDResult = $prepvidID->fetchAll(PDO::FETCH_OBJ);
@@ -159,25 +199,118 @@ if (isset($_GET['Submit'])) {
                     $vidIDResultStringTrim2 = trim($vidIDResultStringTrim1, '"}]');
                     
                     //display youtube video
-?>
-<div class="slideshow-container">
+		?>
+		<div class="slideshow-container">
 
-<div class="mySlides fade">
-  <iframe src="https://www.youtube.com/embed/<?php echo $vidIDResultStringTrim2; ?> " allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"  style="width: 800px; height: 600px; " allowfullscreen></iframe>
-                    <div class="text"><?php echo $values; ?></div>
+		<div class="mySlides fade">
+		  <iframe src="https://www.youtube.com/embed/<?php echo $vidIDResultStringTrim2; ?> " allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"  style="width: 700px; height: 500px; " allowfullscreen></iframe>
+							<div class="text"><?php echo $values; ?></div>
+
+				<?php
+	    
+		//Search for dog by breed:  
+		$petfinderApiUrl = "https://api.petfinder.com/v2/animals?breed=". urlencode($puppyTypeResult) . "&location=08205&distance=50&status=adoptable&limit=3";
+		  
+		  
+		$curl = curl_init($petfinderApiUrl);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, ['Authorization: Bearer '.$petfinderAccessToken]);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		$jsonPetfinder = curl_exec($curl);
+		curl_close($curl);
+
+	
+	$petStrDecode = json_decode($jsonPetfinder, true);
+
+	//Dog Name 0
+	$dogName0 = $petStrDecode["animals"]["0"]["name"];
+	//Dog Age 0
+	$dogAge0 = $petStrDecode["animals"]["0"]["age"];
+	//Dog Gender 0
+	$dogGender0 = $petStrDecode["animals"]["0"]["gender"];
+	//Dog Contact 0
+	$dogContact0 = $petStrDecode["animals"]["0"]["contact"]["address"];
+	//Dog URL 0
+	$dogURL0 = $petStrDecode["animals"]["0"]["url"];
+	//Dog Photo 0
+	$dogPhoto0 = $petStrDecode["animals"]["0"]["photos"]["0"]["full"];
+
+	
+	//Dog Name 1
+	$dogName1 = $petStrDecode["animals"]["1"]["name"];
+	//Dog Age 1
+	$dogAge1 = $petStrDecode["animals"]["1"]["age"];
+	//Dog Gender 1
+	$dogGender1 = $petStrDecode["animals"]["1"]["gender"];
+	//Dog Contact 1
+	$dogContact1 = $petStrDecode["animals"]["1"]["contact"]["address"];
+	//Dog URL 1
+	$dogURL1 = $petStrDecode["animals"]["1"]["url"];
+	//Dog Photo 1
+	$dogPhoto1 = $petStrDecode["animals"]["1"]["photos"]["0"]["full"];				
+  
+  	//Dog Name 2
+	$dogName2 = $petStrDecode["animals"]["2"]["name"];
+	//Dog Age 2
+	$dogAge2 = $petStrDecode["animals"]["2"]["age"];
+	//Dog Gender 2
+	$dogGender2 = $petStrDecode["animals"]["2"]["gender"];
+	//Dog Contact 2
+	$dogContact2 = $petStrDecode["animals"]["2"]["contact"]["address"];
+	//Dog URL 2
+	$dogURL2 = $petStrDecode["animals"]["2"]["url"];
+	//Dog Photo 2
+	$dogPhoto2 = $petStrDecode["animals"]["2"]["photos"]["0"]["full"];
+		
+		
+	?>
+<h2>Adoptable Dogs Near You!</h2>
+
+<table style="width:100%">
+
+  <tr>
+    <td><img src="<?php echo $dogPhoto0; ?>" alt="<?php echo $puppyTypeResult; ?>" width="200" height="200">   <br>
+    <?php echo $dogName0; ?> <br>
+    <?php echo $dogGender0; ?> <br>
+	<?php echo $dogAge0; ?> <br>
+    <a href="<?php echo $dogURL0; ?>" target="_blank" >More Info!</a></td>
+	
+     <td><img src="<?php echo $dogPhoto1; ?> " alt="<?php echo $puppyTypeResult; ?>"  width="200" height="200">   <br>
+    <?php echo $dogName1; ?> <br>
+    <?php echo $dogGender1; ?> <br>
+	<?php echo $dogAge1; ?> <br>
+    <a href="<?php echo $dogURL1; ?>" target="_blank">More Info!</a></td>
+	
+     <td><img src="<?php echo $dogPhoto2; ?> " alt="<?php echo $puppyTypeResult; ?>" width="200" height="200">   <br>
+    <?php echo $dogName2; ?> <br>
+    <?php echo $dogGender2; ?><br>
+	<?php echo $dogAge2; ?> <br>
+    <a href="<?php echo $dogURL2; ?>" target="_blank">More Info!</a></td>
+  </tr>
+</table>
+	
 </div>
-
-</div>   
-        <?php
-                    
-                }
+</div>   		
+<?php
+				}
             }
         }
-    }
+					  if ($countPups > 0) {
+//Move to next or previous result
 ?>
 <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
 <a class="next" onclick="plusSlides(1)">&#10095;</a>
+		
+	  <?php 	
+    }
 
+       
+	
+	
+
+  } ?>
+			
+			
+			
 <br>
 
 <script>
@@ -214,19 +347,13 @@ function showSlides(n) {
 
 //if no puppies from database match user selected attributes:
 if (empty($values)) {
-    echo "<br/>" . "Sorry, no puppies found in our database.";
+    echo "<br/>" . "Sorry, no puppies found in our database that match your request.";
 }
 
+
+
 ?>     
-      <br style="clear: both;" />
-      <hr />
-      <footer id = "f1" style="border: 1px solid; padding: 1px 5px">
-         D. Nealon G. Mayorga
-         <span style="float: right;">
-         <a href="http://validator.w3.org/check/referer">HTML5</a> /
-         <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3">
-         CSS3 </a>
-         </span>
-      </footer>
-   </body>
+
+</body>
+
 </html>
