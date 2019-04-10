@@ -130,8 +130,8 @@ if (isset($_GET['Submit'])) {
 		  
 		
 		 //Petfinder API:
-		$petfinderKey = 'KEY';
-		$petfinderSecret = 'KEY';
+		$petfinderKey = 'key';
+		$petfinderSecret = 'key';
 
 		//using curl in PHP from https://stackoverflow.com/a/25425751 	
 		$ch = curl_init();
@@ -164,11 +164,11 @@ if (isset($_GET['Submit'])) {
                     $puppyTypeResult  = implode(', ', $replacepickedPups);
                     
 					//YouTube API Key
-                    $youtubeKey = "KEY";
+                    $youtubeKey = "key";
                     
                     // generate YouTube API URL
                     $feedURL   = file_get_contents("https://content.googleapis.com/youtube/v3/search?maxResults=1&part=snippet&q=" . urlencode($puppyTypeResult) . "%20facts&type=video&key=" . urldecode($youtubeKey));
-                    $strDecode = json_decode($feedURL, true);
+                  	$strDecode = json_decode($feedURL, true);
                                         
                     //video id:
                     $videoID = $strDecode["items"]["0"]["id"]["videoId"];
@@ -205,7 +205,7 @@ if (isset($_GET['Submit'])) {
                     $vidIDResultStringTrim1 = trim($vidIDResultString, '[{"vidID":"');
                     $vidIDResultStringTrim2 = trim($vidIDResultStringTrim1, '"}]');
                     
-                    //display youtube video
+                    //display youtube video for each select dog breed:
 		?>
 		<div class="slideshow-container">
 
@@ -215,7 +215,9 @@ if (isset($_GET['Submit'])) {
 
 				<?php
 	    
-		//Search for dog by breed:  
+				if(!empty($zipCode)){
+  
+		//Search for dog by breed on Petfinder:  
 		$petfinderApiUrl = "https://api.petfinder.com/v2/animals?breed=". urlencode($puppyTypeResult) . "&location=". urlencode($zipCode) ."&distance=100&status=adoptable&limit=3";
 		  
 		  
@@ -228,7 +230,10 @@ if (isset($_GET['Submit'])) {
 	
 	$petStrDecode = json_decode($jsonPetfinder, true);
 
-	
+  	//Dog Total Count
+	$dogTotalCount = $petStrDecode["pagination"]["total_count"];
+  
+  if($dogTotalCount > 0){
 	//Dog Name 0
 	$dogName0 = $petStrDecode["animals"]["0"]["name"];
 	//Dog ID 0
@@ -245,14 +250,27 @@ if (isset($_GET['Submit'])) {
 	//Dog URL 0
 	$dogURL0 = $petStrDecode["animals"]["0"]["url"];
 	//Dog Photo 0
+	$dogPhotoLength0 = $petStrDecode["animals"]["0"]["photos"];
+
+
+	$dogPhotoLength0Count = count($dogPhotoLength0);
+	if($dogPhotoLength0Count == 0){
+		
+		$dogPhoto0 =  "noPhoto.png";
+
+	}
+	else{
+	
 	$dogPhoto0 = $petStrDecode["animals"]["0"]["photos"]["0"]["full"];
 		
-	$query   = "INSERT INTO adoptPups0 (dogName0, petfinderID0, dogContactCity0, dogContactState0, 
+	}
+  
+	$pupQuery0   = "INSERT INTO adoptPups0 (dogName0, petfinderID0, dogContactCity0, dogContactState0, 
 				dogContactZip0, dogContactCountry0) 
 				VALUES ('$dogName0', '$dogID0', '$dogContactCity0', '$dogContactState0', '$dogContactZip0', '$dogContactCountry0')";
-	$vidStmt = $dbh->prepare($query);
-	$vidStmt->execute();
-	$vidStmt = null;
+	$pupStmt0 = $dbh->prepare($pupQuery0);
+	$pupStmt0->execute();
+	$pupStmt0 = null;
 	
 	//Dog Name 1
 	$dogName1 = $petStrDecode["animals"]["1"]["name"];
@@ -270,13 +288,27 @@ if (isset($_GET['Submit'])) {
 	//Dog URL 1
 	$dogURL1 = $petStrDecode["animals"]["1"]["url"];
 	//Dog Photo 1
-	$dogPhoto1 = $petStrDecode["animals"]["1"]["photos"]["0"]["full"];				
+	$dogPhotoLength1 = $petStrDecode["animals"]["1"]["photos"];
+
+
+	$dogPhotoLength1Count = count($dogPhotoLength1);
+	if($dogPhotoLength1Count == 0){
+		
+		
+		$dogPhoto1 =  "noPhoto.png";
+
+	}
+	else{
+	
+	$dogPhoto1 = $petStrDecode["animals"]["1"]["photos"]["0"]["full"];
+		
+	}
   
-  	$query   = "INSERT INTO adoptPups1 (dogName1, petfinderID1, dogContactCity1, dogContactState1, dogContactZip1, dogContactCountry1) 
+  	$pupQuery1   = "INSERT INTO adoptPups1 (dogName1, petfinderID1, dogContactCity1, dogContactState1, dogContactZip1, dogContactCountry1) 
 				VALUES ('$dogName1','$dogID1', '$dogContactCity1', '$dogContactState1', '$dogContactZip1', '$dogContactCountry1')";
-	$vidStmt = $dbh->prepare($query);
-	$vidStmt->execute();
-	$vidStmt = null;
+	$pupStmt1 = $dbh->prepare($pupQuery1);
+	$pupStmt1->execute();
+	$pupStmt1 = null;
 	
   	//Dog Name 2
 	$dogName2 = $petStrDecode["animals"]["2"]["name"];
@@ -294,73 +326,383 @@ if (isset($_GET['Submit'])) {
 	//Dog URL 2
 	$dogURL2 = $petStrDecode["animals"]["2"]["url"];
 	//Dog Photo 2
-	$dogPhoto2 = $petStrDecode["animals"]["2"]["photos"]["0"]["full"];
+	$dogPhotoLength2 = $petStrDecode["animals"]["2"]["photos"];
 
-	$query   = "INSERT INTO adoptPups2 (dogName2, petfinderID2,  dogContactCity2, dogContactState2, 
+
+	$dogPhotoLength2Count = count($dogPhotoLength2);
+	if($dogPhotoLength2Count == 0){
+		
+		
+		$dogPhoto2 =  "noPhoto.png";
+
+	}
+	else{
+	
+	$dogPhoto2 = $petStrDecode["animals"]["2"]["photos"]["0"]["full"];
+		
+	}
+  
+ 	$pupQuery2   = "INSERT INTO adoptPups2 (dogName2, petfinderID2,  dogContactCity2, dogContactState2, 
 			dogContactZip2, dogContactCountry2) 
 			VALUES ('$dogName2', '$dogID2', '$dogContactCity2', '$dogContactState2', '$dogContactZip2', '$dogContactCountry2')";
-	$vidStmt = $dbh->prepare($query);
-	$vidStmt->execute();
-	$vidStmt = null;
+	$pupStmt2 = $dbh->prepare($pupQuery2);
+	$pupStmt2->execute();
+	$pupStmt2 = null;
 		
-		
-  
-			//select ID from petfinder, zip code, and country for each dog in group 0
-			$selectPetfinder0 = "SELECT petfinderID0, dogContactZip0, dogContactCountry0 FROM adoptPups0 WHERE petfinderID0 = '$dogID0';";
+	 //DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 -->
+			//select from petfinder COUNTRY for each dog in group 0
+			$selectPetfinder0 = "SELECT dogContactCountry0 AS '' FROM adoptPups0 WHERE petfinderID0 = '$dogID0' Limit 1;";
 			$prepselectPetfinder0   = $dbh->prepare($selectPetfinder0);
 			$prepselectPetfinder0->execute();
-			$prepselectPetfinderResult0 = $prepselectPetfinder0->fetchAll(PDO::FETCH_OBJ);
+			$PetfinderCountry0 = $prepselectPetfinder0->fetchAll(PDO::FETCH_OBJ);
 			$prepselectPetfinder0   = null;
+			$PetfinderCountry0Encode = json_encode($PetfinderCountry0);
+			$PetfinderCountry0EncodeTrim1 = trim($PetfinderCountry0Encode, '[{"":"');
+            $PetfinderCountry0EncodeTrim2 = trim($PetfinderCountry0EncodeTrim1, '"}]');
+                    
+			//select from petfinder ZIP CODE for each dog in group 0
+			$selectPetfinderZ0 = "SELECT dogContactZip0 AS '' FROM adoptPups0 WHERE petfinderID0 = '$dogID0' Limit 1;";
+			$prepselectPetfinderZ0   = $dbh->prepare($selectPetfinderZ0);
+			$prepselectPetfinderZ0->execute();
+			$PetfinderZip0 = $prepselectPetfinderZ0->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinderZ0   = null;
+			$PetfinderZip0Encode = json_encode($PetfinderZip0);
+			$PetfinderZip0EncodeTrim1 = trim($PetfinderZip0Encode, '[{"":"');
+            $PetfinderZip0EncodeTrim2 = trim($PetfinderZip0EncodeTrim1, '"}]');
+
 			
-			//select ID from petfinder, zip code, and country for each dog in group 1
-			$selectPetfinder1 = "SELECT petfinderID1, dogContactZip1, dogContactCountry1 FROM adoptPups1 WHERE petfinderID1 = '$dogID1';";
+	//DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 -->
+			//select from petfinder COUNTRY for each dog in group 1
+			$selectPetfinder1 = "SELECT dogContactCountry1 AS '' FROM adoptPups1 WHERE petfinderID1 = '$dogID1' Limit 1;";
 			$prepselectPetfinder1   = $dbh->prepare($selectPetfinder1);
 			$prepselectPetfinder1->execute();
-			$prepselectPetfinderResult1 = $prepselectPetfinder1->fetchAll(PDO::FETCH_OBJ);
+			$PetfinderCountry1 = $prepselectPetfinder1->fetchAll(PDO::FETCH_OBJ);
 			$prepselectPetfinder1   = null;
-			
-			//select ID from petfinder, zip code, and country for each dog in group 2
-			$selectPetfinder2 = "SELECT petfinderID2, dogContactZip2, dogContactCountry2 FROM adoptPups2 WHERE petfinderID2 = '$dogID2';";
-			$prepselectPetfinder2   = $dbh->prepare($selectPetfinder2);
+			$PetfinderCountry1Encode = json_encode($PetfinderCountry1);
+			$PetfinderCountry1EncodeTrim1 = trim($PetfinderCountry1Encode, '[{"":"');
+			$PetfinderCountry1EncodeTrim2 = trim($PetfinderCountry1EncodeTrim1, '"}]'); //added (Diane)
+                    			
+			//select from petfinder ZIP CODE for each dog in group 1
+			$selectPetfinderZ1 = "SELECT dogContactZip1 AS '' FROM adoptPups1 WHERE petfinderID1 = '$dogID1' Limit 1;";
+			$prepselectPetfinderZ1   = $dbh->prepare($selectPetfinderZ1);
+			$prepselectPetfinderZ1->execute();
+			$PetfinderZip1 = $prepselectPetfinderZ1->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinderZ1   = null;
+			$PetfinderZip1Encode = json_encode($PetfinderZip1);
+			$PetfinderZip1EncodeTrim1 = trim($PetfinderZip1Encode, '[{"":"');
+            $PetfinderZip1EncodeTrim2 = trim($PetfinderZip1EncodeTrim1, '"}]'); //added (Diane)
+
+	//DOG2 DOG2 DOG2 DOG2 DOG2 DOG2	DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 -->
+			//select from petfinder COUNTRY for each dog in group 2
+			$selectPetfinder2 = "SELECT dogContactCountry2 AS '' FROM adoptPups2 WHERE petfinderID2 = '$dogID2' Limit 1;";
+			$prepselectPetfinder2   = $dbh->prepare($selectPetfinder0);
 			$prepselectPetfinder2->execute();
-			$prepselectPetfinderResult2 = $prepselectPetfinder2->fetchAll(PDO::FETCH_OBJ);
+			$PetfinderCountry2 = $prepselectPetfinder2->fetchAll(PDO::FETCH_OBJ);
 			$prepselectPetfinder2   = null;
+			$PetfinderCountry2Encode = json_encode($PetfinderCountry2);
+			$PetfinderCountry2EncodeTrim1 = trim($PetfinderCountry2Encode, '[{"":"');
+            $PetfinderCountry2EncodeTrim2 = trim($PetfinderCountry2EncodeTrim1, '"}]'); //added (Diane)
+
+			
+			//select from petfinder zip code for each dog in group 2
+			$selectPetfinderZ2 = "SELECT dogContactZip2 AS '' FROM adoptPups2 WHERE petfinderID2 = '$dogID2' Limit 1;";
+			$prepselectPetfinderZ2   = $dbh->prepare($selectPetfinderZ2);
+			$prepselectPetfinderZ2->execute();
+			$PetfinderZipZ2 = $prepselectPetfinderZ2->fetchAll(PDO::FETCH_OBJ);
+			$prepselectPetfinderZ2   = null;
+			$PetfinderZipZ2Encode = json_encode($PetfinderZipZ2);
+			$PetfinderZip2EncodeTrim1 = trim($PetfinderZipZ2Encode, '[{"":"');
+            $PetfinderZip2EncodeTrim2 = trim($PetfinderZip2EncodeTrim1, '"}]'); //added (Diane)
+	
+
+//display petfinder dogs plus nearest pet shops to them:	
 	?>
 <h2>Adoptable Dogs Near You!</h2>
 
 <table style="width:100%">
+ <!--	DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 DOG 0 -->
 
   <tr>
     <td><img src="<?php echo $dogPhoto0; ?>" alt="<?php echo $puppyTypeResult; ?>" width="200" height="200">   <br>
     <?php echo $dogName0; ?> <br>
     <?php echo $dogGender0; ?> <br>
 	<?php echo $dogAge0; ?> <br>
-    <a href="<?php echo $dogURL0; ?>" target="_blank" >More Info!</a>
-	</td>
+    <a href="<?php echo $dogURL0; ?>" target="_blank" >Petfinder Page!</a><br>
+		<?php
+
+	$baseTomTomURL = 'api.tomtom.com';
+	$suppliesQuery = 'pet supplies';
+	$tomtomkey1 = 'key';
 	
+	//part 1: getting lat and lon values from an entered zip
+	//here you would use the $dogContactZip0
+	//This first url gets lat and lon values for a more accurate result in part 2
+	$url = "https://" . urlencode($baseTomTomURL)."/search/2/structuredGeocode.json?key=".urlencode($tomtomkey1)."&countryCode=".urlencode($PetfinderCountry0EncodeTrim2)."&limit=10&postalCode=".urlencode($PetfinderZip0EncodeTrim2);
+
+	
+	$content = file_get_contents($url);
+	$json = json_decode($content, true);
+	    
+	//finally!
+	 $lat = $json["results"]["0"]["position"]["lat"];
+	 $lon = $json["results"]["0"]["position"]["lon"];
+	
+	//example of what url should look like to get json of pet stores
+	//https://api.tomtom.com/search/2/poiSearch/pet%20store.json?limit=3&countrySet=US&lat=39.71246&lon=-74.25372&key=CALC1EJWVupfChMGr8CT7vpEzll896Gs
+	
+	//Part 2: this will yeild the json we need for the pet stores (ignore the naming convention)
+	$petshops = "https://".urlencode($baseTomTomURL)."/search/2/categorySearch/".urlencode($suppliesQuery).".json?limit=3&countrySet=".urlencode($PetfinderCountry0EncodeTrim2)."&lat=".urlencode($lat)."&lon=".urlencode($lon)."&key=".urlencode($tomtomkey1); //finally!
+	
+	$petResults = file_get_contents($petshops);
+
+	$info = json_decode($petResults, true);
+
+
+		//parsing out information
+		//this is what we hope to echo out
+		$store_name = $info["results"]["0"]["poi"]["name"];
+		$store_phone = $info["results"]["0"]["poi"]["phone"];
+		$store_address = $info["results"]["0"]["address"]["freeformAddress"];
+		$store_zip = $info["results"]["0"]["address"]["postalCode"];
+		
+		$insertion = "INSERT INTO stores (name, phone, address, zip, petfinderID) VALUES ('$store_name', '$store_phone', '$store_address', '$store_zip', '$dogID0')";
+	
+		$insertionStmt = $dbh->prepare($insertion);
+		$insertionStmt->execute();
+		$insertionStmt = null;
+	
+	//END OF IMPORTANT CODE FOR PUPPY SEARCH
+    
+    ?>
+ Pet Supplies Shop Near this Dog:
+ <?php
+    $query0 = "SELECT DISTINCT * FROM stores WHERE petfinderID = '$dogID0' Limit 1";
+	
+	 $query0Stmt = $dbh->prepare($query0);
+        $query0Stmt->execute();
+        $result0     = $query0Stmt->fetchAll(PDO::FETCH_OBJ);
+        $query0Stmt       = null;
+        $stores0 = json_decode(json_encode($result0), true);
+
+  
+    foreach($stores0 as $s0){
+		echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>". $s0['name'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>". $s0['phone'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s0['address'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	echo "<br>";
+    }
+	
+	?>
+	</td>
+ <!--	DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 DOG 1 -->
      <td><img src="<?php echo $dogPhoto1; ?> " alt="<?php echo $puppyTypeResult; ?>"  width="200" height="200">   <br>
     <?php echo $dogName1; ?> <br>
     <?php echo $dogGender1; ?> <br>
 	<?php echo $dogAge1; ?> <br>
-    <a href="<?php echo $dogURL1; ?>" target="_blank">More Info!</a>
-	</td>
+    <a href="<?php echo $dogURL1; ?>" target="_blank">Petfinder Page!</a><br>
 	
+		<?php
+		$tomtomkey2 = 'key';
+
+	//part 1: getting lat and lon values from an entered zip
+	//here you would use the $dogContactZip0
+	//This first url gets lat and lon values for a more accurate result in part 2
+	$url1 = "https://" . urlencode($baseTomTomURL)."/search/2/structuredGeocode.json?key=".urlencode($tomtomkey2)."&countryCode=".urlencode($PetfinderCountry1EncodeTrim2)."&limit=10&postalCode=".urlencode($PetfinderZip1EncodeTrim2);//added (Diane)
+
+	
+	$content1 = file_get_contents($url1);
+	$json1 = json_decode($content1, true);
+	
+	     			
+	//finally!
+	 $lat1 = $json1["results"]["0"]["position"]["lat"];
+	 $lon1 = $json1["results"]["0"]["position"]["lon"];
+	
+	//example of what url should look like to get json of pet stores
+	//https://api.tomtom.com/search/2/poiSearch/pet%20store.json?limit=3&countrySet=US&lat=39.71246&lon=-74.25372&key=CALC1EJWVupfChMGr8CT7vpEzll896Gs
+	
+	//Part 2: this will yeild the json we need for the pet stores (ignore the naming convention)
+	$petshops1 = "https://".urlencode($baseTomTomURL)."/search/2/categorySearch/".urlencode($suppliesQuery).".json?limit=3&countrySet=".urlencode($PetfinderCountry1EncodeTrim2)."&lat=".urlencode($lat1)."&lon=".urlencode($lon1)."&key=".urlencode($tomtomkey2); //added (Diane)
+	
+	$petResults1 = file_get_contents($petshops1);
+
+	$info1 = json_decode($petResults1, true);
+  
+		//parsing out information
+		//this is what we hope to echo out
+		$store_name1 = $info1["results"]["0"]["poi"]["name"];
+		$store_phone1 = $info1["results"]["0"]["poi"]["phone"];
+		$store_address1 = $info1["results"]["0"]["address"]["freeformAddress"];
+		$store_zip1 = $info1["results"]["0"]["address"]["postalCode"];
+		
+		$insertion1 = "INSERT INTO stores (name, phone, address, zip, petfinderID) VALUES ('$store_name1', '$store_phone1', '$store_address1', '$store_zip1', '$dogID1')";
+	
+		$insertionStmt1 = $dbh->prepare($insertion1);
+		$insertionStmt1->execute();
+		$insertionStmt1 = null;
+	
+	
+	//END OF IMPORTANT CODE FOR PUPPY SEARCH
+    
+    //added approx zip, so search results still show even if inputed zip doesnt match
+    //query results
+    $query1 = "SELECT DISTINCT * FROM stores WHERE petfinderID = '$dogID1' Limit 1";
+	
+	 $query1Stmt = $dbh->prepare($query1);
+        $query1Stmt->execute();
+        $result1     = $query1Stmt->fetchAll(PDO::FETCH_OBJ);
+        $query1Stmt       = null;
+        $stores1 = json_decode(json_encode($result1), true);
+
+ ?>
+ Pet Supplies Shop Near this Dog:
+ <?php  
+    foreach($stores1 as $s1){
+		echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>". $s1['name'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s1['phone'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s1['address'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	echo "<br>";
+    }
+	
+	?>
+	</td>
+<!--- DOG2 DOG2 DOG2 DOG2 DOG2 DOG2	DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 DOG2 -->
      <td><img src="<?php echo $dogPhoto2; ?> " alt="<?php echo $puppyTypeResult; ?>" width="200" height="200">   <br>
     <?php echo $dogName2; ?> <br>
     <?php echo $dogGender2; ?><br>
 	<?php echo $dogAge2; ?> <br>
-    <a href="<?php echo $dogURL2; ?>" target="_blank">More Info!</a>
-	</td>
+    <a href="<?php echo $dogURL2; ?>" target="_blank">Petfinder Page!</a><br>
 	
+	<?php
+	$tomtomkey3 = 'key';
+
+	//part 1: getting lat and lon values from an entered zip
+	//here you would use the $dogContactZip0
+	//This first url gets lat and lon values for a more accurate result in part 2
+	$url2 = "https://" . urlencode($baseTomTomURL)."/search/2/structuredGeocode.json?key=".urlencode($tomtomkey3)."&countryCode=".urlencode($PetfinderCountry2EncodeTrim2)."&limit=10&postalCode=".urlencode($PetfinderZip2EncodeTrim2); //added (Diane)
+
+	
+	$content2 = file_get_contents($url2);
+	$json2 = json_decode($content2, true);
+	    
+	//finally!
+	 $lat2 = $json2["results"]["0"]["position"]["lat"];
+	 $lon2 = $json2["results"]["0"]["position"]["lon"];
+	
+	//example of what url should look like to get json of pet stores
+	//https://api.tomtom.com/search/2/poiSearch/pet%20store.json?limit=3&countrySet=US&lat=39.71246&lon=-74.25372&key=CALC1EJWVupfChMGr8CT7vpEzll896Gs
+	
+	//Part 2: this will yeild the json we need for the pet stores (ignore the naming convention)
+	$petshops2 = "https://".urlencode($baseTomTomURL)."/search/2/categorySearch/".urlencode($suppliesQuery).".json?limit=3&countrySet=".urlencode($PetfinderCountry2EncodeTrim2)."&lat=".urlencode($lat2)."&lon=".urlencode($lon2)."&key=".urlencode($tomtomkey3); //added (Diane)
+	
+
+
+
+  
+	$petResults2 = file_get_contents($petshops2);
+	
+
+	$info2 = json_decode($petResults2, true);
+	
+		//parsing out information
+		//this is what we hope to echo out
+		$store_name2 = $info2["results"]["0"]["poi"]["name"];
+		$store_phone2 = $info2["results"]["0"]["poi"]["phone"];
+		$store_address2 = $info2["results"]["0"]["address"]["freeformAddress"];
+		$store_zip2 = $info2["results"]["0"]["address"]["postalCode"];
+		
+		$insertion2 = "INSERT INTO stores (name, phone, address, zip, petfinderID) VALUES ('$store_name2', '$store_phone2', '$store_address2', '$store_zip2', '$dogID2')";
+	
+		$insertionStmt2 = $dbh->prepare($insertion2);
+		$insertionStmt2->execute();
+		$insertionStmt2 = null;
+	
+	
+	//END OF IMPORTANT CODE FOR PUPPY SEARCH
+    
+    //added approx zip, so search results still show even if inputed zip doesnt match
+    //query results
+    $query2 = "SELECT DISTINCT * FROM stores WHERE petfinderID = '$dogID2' Limit 1";
+	
+	 $query2Stmt = $dbh->prepare($query2);
+        $query2Stmt->execute();
+        $result2     = $query2Stmt->fetchAll(PDO::FETCH_OBJ);
+        $query2Stmt       = null;
+        $stores2 = json_decode(json_encode($result2), true);
+
+ ?>
+ Pet Supplies Shop Near this Dog:
+ <?php
+    foreach($stores2 as $s2){
+		echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s2['name'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s2['phone'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	
+    	echo "<table style='width:100%'>";	
+    		echo "<tr>";
+    			echo "<td>".  $s2['address'] . "</td>";
+    		echo "</tr>";
+    	echo "</table>";
+    	echo "<br>";
+    }
+	
+	?>
+	</td>
   </tr>
 </table>
+<?php
+				}
+				
+						else{
 	
+		    echo "<br/>" . "Sorry, no dogs found in Petfinder that match your request." . "<br/>";
+
+  }}
+?>
 </div>
 </div>   		
 <?php
-				}
+	
             }
-        }
+        }}
+		
+
 					  if ($countPups > 0) {
 //Move to next or previous result
 ?>
@@ -368,16 +710,10 @@ if (isset($_GET['Submit'])) {
 <a class="next" onclick="plusSlides(1)">&#10095;</a>
 		
 	  <?php 	
-    }
-
-       
+    }   
+	} }
 	
-	
-
-  } ?>
-			
-			
-			
+?>
 <br>
 
 <script>
@@ -410,7 +746,9 @@ function showSlides(n) {
 </script>
 <?php
     
-}
+
+
+
 
 //if no puppies from database match user selected attributes:
 if (empty($values)) {
